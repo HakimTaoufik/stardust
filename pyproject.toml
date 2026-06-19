@@ -1,27 +1,40 @@
 [project]
-name = "stardust"
-version = "0.1"
-description = " simple and configurable config management package for all ML needs "
+name = "stardust-config"
+version = "0.1.0"
+description = "Typed configuration management for ML projects"
 readme = "README.md"
 authors = [
     { name = "HakimTaoufik", email = "al-hakim.taoufik@polytechnique.edu" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
+license = "LGPL-2.1-only"
+license-files = ["LICENSE"]
 dependencies = [
-    "pydantic>=2.13.4",
-    "pyyaml>=6.0.3",
-    "rich>=15.0.0",
+    "pydantic>=2",
+    "pyyaml>=6",
 ]
 
-[project.scripts]
-stardust = "stardust:main"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Repository = "https://github.com/HakimTaoufik/stardust"
+Issues = "https://github.com/HakimTaoufik/stardust/issues"
 
 [build-system]
-requires = ["uv_build>=0.11.17,<0.12.0"]
+requires = ["uv_build>=0.11.21,<0.12.0"]
 build-backend = "uv_build"
 
-[dependency-groups]
-dev = [
-    "pytest>=9.1.1",
-    "ruff>=0.15.18",
-]
+[tool.uv.build-backend]
+module-name = "stardust"
