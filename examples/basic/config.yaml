@@ -1,0 +1,7 @@
+seed: 42
+batch_size: 8
+lr: 0.05
+
+model:
+  name: allenai/Olmo-3-7B-Instruct
+  max_context_tokens: 8192
