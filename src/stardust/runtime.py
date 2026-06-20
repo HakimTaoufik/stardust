@@ -6,7 +6,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError, distributions, version
 from pathlib import Path
 from typing import Literal, TypeVar
 
@@ -113,6 +113,28 @@ def save_git_metadata(run_dir: Path) -> None:
     git_path = run_dir / "git.json"
     git_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
+def save_packages(run_dir: Path) -> None:
+    """save installed python packages in the current environment"""
+    packages: list[dict[str, str]] = []
+
+    for package in distributions():
+        name = package.metadata.get("Name")
+
+        if name is None:
+            continue
+
+        packages.append(
+            {
+                "name": name,
+                "version": package.version,
+            }
+        )
+
+    packages.sort(key=lambda package: package["name"].lower())
+
+    packages_path = run_dir / "packages.json"
+    packages_path.write_text(json.dumps(packages, indent=2), encoding="utf-8")
+
 
 def save_run_snapshot(config: BaseModel, run_dir: Path, config_path: Path, overrides: list[str], tracking: TrackingMode) -> None:
     """save run files depending on the selected tracking mode"""
@@ -125,6 +147,7 @@ def save_run_snapshot(config: BaseModel, run_dir: Path, config_path: Path, overr
         save_command(run_dir)
         save_metadata(run_dir, config_path, overrides, tracking)
         save_git_metadata(run_dir)
+        save_packages(run_dir)
         return
 
     raise ValueError("tracking must be either 'config' or 'full'")
