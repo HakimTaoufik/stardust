@@ -5,7 +5,10 @@ import yaml
 
 def parse_value(value: str) -> Any:
     """parse a string and standarize it using yaml.safe_load to handle booleans, numbers, lists, etc.."""
-    return yaml.safe_load(value)
+    try:
+        return yaml.safe_load(value)
+    except yaml.YAMLError as error:
+        raise ValueError(f"Invalid override value {value!r}") from error
 
 
 def set_nested(data: dict[str, Any], key: str, value: Any) -> None:
@@ -30,10 +33,17 @@ def set_nested(data: dict[str, Any], key: str, value: Any) -> None:
         value: the value to store at that key
     """
     parts = key.split(".")
+    if any(part == "" for part in parts):
+        raise ValueError(f"Invalid override key {key!r}")
     current = data
 
     for part in parts[:-1]:
-        current = current.setdefault(part, {})
+        next_value = current.setdefault(part, {})
+
+        if not isinstance(next_value, dict):
+            raise TypeError(f"Cannot set nested override {key!r}: {part!r} is already a value")
+
+        current = next_value
 
     current[parts[-1]] = value
 
