@@ -22,7 +22,7 @@ def load_config(config_type: type[ConfigT], config_path: str | Path, overrides: 
         config_type: the pydantic model class to use for validation
         config_path: the path to the yaml config file
         overrides: a list of overrides in the form of "key=value" strings
-    
+
     Returns:
         a validated config object
     """

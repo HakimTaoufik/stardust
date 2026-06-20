@@ -16,6 +16,7 @@ ConfigT = TypeVar("ConfigT", bound=BaseModel)
 @dataclass
 class RunContext:
     """context object that is passed to the main function of a stardust run"""
+
     run_dir: Path
     config_path: Path
     overrides: list[str]
@@ -37,7 +38,7 @@ def save_resolved_config(config: BaseModel, run_dir: Path) -> None:
 def parse_args() -> tuple[Path, list[str]]:
     """
     parse command line arguments and return the config path and overrides
-    
+
     Returns:
         config_path: the path to the yaml config file
         overrides: a list of overrides in the form of "key=value" strings
