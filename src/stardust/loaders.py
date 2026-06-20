@@ -13,6 +13,14 @@ else:
     import tomli as tomllib
 
 
+def _read_config_file(path: Path) -> str:
+    """read a config file as text"""
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Config file not found: {path}") from None
+
+
 def _validate_config_data(data: Any, path: Path) -> dict[str, Any]:
     """Validate that the config data is a dictionary and not empty"""
     if data is None:
@@ -27,21 +35,36 @@ def _validate_config_data(data: Any, path: Path) -> dict[str, Any]:
 def load_yaml(path: str | Path) -> dict[str, Any]:
     """Load a yaml file and return its content as a dictionary"""
     path = Path(path)
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+
+    try:
+        data = yaml.safe_load(_read_config_file(path))
+    except yaml.YAMLError as error:
+        raise ValueError(f"Invalid YAML config file {path}: {error}") from error
+
     return _validate_config_data(data, path)
 
 
 def load_json(path: str | Path) -> dict[str, Any]:
     """Load a json config file and return its content as a dictionary"""
     path = Path(path)
-    data = json.loads(path.read_text(encoding="utf-8"))
+
+    try:
+        data = json.loads(_read_config_file(path))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Invalid JSON config file {path}: {error.msg} at line {error.lineno}, column {error.colno}") from error
+
     return _validate_config_data(data, path)
 
 
 def load_toml(path: str | Path) -> dict[str, Any]:
     """Load a toml config file and return its content as a dictionary"""
     path = Path(path)
-    data = tomllib.loads(path.read_text(encoding="utf-8"))
+
+    try:
+        data = tomllib.loads(_read_config_file(path))
+    except tomllib.TOMLDecodeError as error:
+        raise ValueError(f"Invalid TOML config file {path}: {error}") from error
+
     return _validate_config_data(data, path)
 
 
