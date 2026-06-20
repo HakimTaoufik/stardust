@@ -73,6 +73,7 @@ runs/.../
   config.resolved.yaml
   command.txt
   metadata.json
+  git.json
 ```
 
 `command.txt` contains the command used to start the run.
@@ -84,3 +85,15 @@ runs/.../
 - platform
 - config path
 - CLI overrides
+- run directory
+- working directory
+- Python executable
+- hostname
+- Stardust version
+
+`git.json` contains Git metadata when the run is started inside a Git repository:
+
+- repository root
+- branch
+- commit
+- dirty state
