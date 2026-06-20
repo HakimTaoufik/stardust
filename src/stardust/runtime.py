@@ -113,6 +113,7 @@ def save_git_metadata(run_dir: Path) -> None:
     git_path = run_dir / "git.json"
     git_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
+
 def save_packages(run_dir: Path) -> None:
     """save installed python packages in the current environment"""
     packages: list[dict[str, str]] = []
