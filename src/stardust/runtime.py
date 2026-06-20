@@ -1,10 +1,12 @@
 import json
 import platform
 import shlex
+import subprocess
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Literal, TypeVar
 
@@ -50,19 +52,66 @@ def save_command(run_dir: Path) -> None:
     (run_dir / "command.txt").write_text(command + "\n", encoding="utf-8")
 
 
+def get_stardust_version() -> str | None:
+    """return the installed stardust package version if available"""
+    try:
+        return version("stardust-config")
+    except PackageNotFoundError:
+        return None
+
+
+def run_command(command: list[str]) -> str | None:
+    """run a command and return stdout, or None if it fails"""
+    try:
+        result = subprocess.run(command, capture_output=True, check=True, text=True)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+    return result.stdout.strip()
+
+
 def save_metadata(run_dir: Path, config_path: Path, overrides: list[str], tracking: TrackingMode) -> None:
     """save basic metadata about the run"""
     metadata = {
-        "started_at": datetime.now().isoformat(),
-        "python_version": sys.version,
-        "platform": platform.platform(),
+        "started_at": datetime.now().astimezone().isoformat(),
+        "run_dir": str(run_dir),
+        "working_dir": str(Path.cwd()),
         "config_path": str(config_path),
         "overrides": overrides,
         "tracking": tracking,
+        "python_version": sys.version,
+        "python_executable": sys.executable,
+        "platform": platform.platform(),
+        "hostname": platform.node(),
+        "stardust_version": get_stardust_version(),
     }
 
     metadata_path = run_dir / "metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+
+def save_git_metadata(run_dir: Path) -> None:
+    """save git metadata if the run is inside a git repository"""
+    git_root = run_command(["git", "rev-parse", "--show-toplevel"])
+
+    metadata: dict[str, bool | str | None] = {
+        "available": git_root is not None,
+    }
+
+    if git_root is not None:
+        status = run_command(["git", "status", "--porcelain"])
+
+        metadata.update(
+            {
+                "root": git_root,
+                "branch": run_command(["git", "branch", "--show-current"]),
+                "commit": run_command(["git", "rev-parse", "HEAD"]),
+                "is_dirty": bool(status),
+            }
+        )
+
+    git_path = run_dir / "git.json"
+    git_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
 
 def save_run_snapshot(config: BaseModel, run_dir: Path, config_path: Path, overrides: list[str], tracking: TrackingMode) -> None:
@@ -75,6 +124,7 @@ def save_run_snapshot(config: BaseModel, run_dir: Path, config_path: Path, overr
     if tracking == "full":
         save_command(run_dir)
         save_metadata(run_dir, config_path, overrides, tracking)
+        save_git_metadata(run_dir)
         return
 
     raise ValueError("tracking must be either 'config' or 'full'")
