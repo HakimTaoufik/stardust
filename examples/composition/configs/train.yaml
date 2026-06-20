@@ -1,0 +1,6 @@
+defaults:
+  - model: olmo3_7b
+  - data: trec2021
+  - trainer: qlora
+
+seed: 42

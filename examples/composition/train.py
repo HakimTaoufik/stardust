@@ -5,16 +5,25 @@ from stardust import RunContext, run
 
 class ModelConfig(BaseModel):
     name: str
-    # Field with a constraint that it must be greater than 0
     max_context_tokens: int = Field(gt=0)
+
+
+class DataConfig(BaseModel):
+    name: str
+    path: str
+
+
+class TrainerConfig(BaseModel):
+    method: str
+    lr: float = Field(gt=0)
+    batch_size: int = Field(gt=0)
 
 
 class TrainConfig(BaseModel):
     seed: int = 42
-    batch_size: int = Field(gt=0)
-    lr: float = Field(gt=0)
-    # notice the nested configs
     model: ModelConfig
+    data: DataConfig
+    trainer: TrainerConfig
 
 
 def main(config: TrainConfig, context: RunContext) -> None:
