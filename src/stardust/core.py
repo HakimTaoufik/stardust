@@ -3,9 +3,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 
-from stardust.loaders import load_file
-from stardust.merge import deep_merge
-from stardust.overrides import parse_overrides
+from stardust.composition import compose_config
 
 # must be a subclass of BaseModel since that's how pydantic works
 ConfigT = TypeVar("ConfigT", bound=BaseModel)
@@ -26,10 +24,7 @@ def load_config(config_type: type[ConfigT], config_path: str | Path, overrides: 
     Returns:
         a validated config object
     """
-    data = load_file(config_path)
-
-    if overrides:
-        data = deep_merge(data, parse_overrides(overrides))
+    data = compose_config(config_path, overrides)
 
     # validate the config using the pydantic model
     return config_type.model_validate(data)
