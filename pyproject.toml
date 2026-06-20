@@ -1,6 +1,6 @@
 [project]
 name = "stardust-config"
-version = "0.1.1"
+version = "0.2.0"
 description = "Typed configuration management for ML projects"
 readme = "README.md"
 authors = [
@@ -12,6 +12,7 @@ license-files = ["LICENSE"]
 dependencies = [
     "pydantic>=2",
     "pyyaml>=6",
+    "tomli>=2; python_version < '3.11'",
 ]
 
 classifiers = [
