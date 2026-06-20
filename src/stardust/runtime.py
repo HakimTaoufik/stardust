@@ -1,5 +1,4 @@
 import json
-import yaml
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -7,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TypeVar
 
+import yaml
 from pydantic import BaseModel
 
 from stardust.core import load_config
