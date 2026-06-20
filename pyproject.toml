@@ -1,6 +1,6 @@
 [project]
 name = "stardust-config"
-version = "0.4.0"
+version = "0.4.1"
 description = "Typed configuration management for ML projects"
 readme = "README.md"
 authors = [
