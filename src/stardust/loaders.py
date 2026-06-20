@@ -5,6 +5,8 @@ from typing import Any
 
 import yaml
 
+# tomlib is part of the standard library of python 3.11+
+# tomli is the backport for python 3.10
 if sys.version_info >= (3, 11):
     import tomllib
 else:
