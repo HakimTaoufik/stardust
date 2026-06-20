@@ -11,13 +11,13 @@ This example shows the simplest Stardust workflow:
 Run from the repository root:
 
 ```bash
-python examples/basic/train.py --config examples/basic/config.yaml
+uv run examples/basic/train.py --config examples/basic/config.yaml
 ```
 
 or:
 
 ```bash
-python examples/basic/train.py --config examples/basic/config.json
+uv run examples/basic/train.py --config examples/basic/config.json
 ```
 
 as it works with all 3 file formats
@@ -33,7 +33,7 @@ Expected:
 You can override values from the command line:
 
 ```bash
-python examples/basic/train.py --config examples/basic/config.yaml lr=0.001 model.max_context_tokens=4096
+uv run examples/basic/train.py --config examples/basic/config.yaml lr=0.001 model.max_context_tokens=4096
 ```
 
 Expected:
