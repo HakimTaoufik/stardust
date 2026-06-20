@@ -1,5 +1,19 @@
 # Stardust - Simple ML configuration management
 
+[![PyPI version](https://img.shields.io/pypi/v/stardust-config.svg)](https://pypi.org/project/stardust-config/)
+[![Python versions](https://img.shields.io/pypi/pyversions/stardust-config.svg)](https://pypi.org/project/stardust-config/)
+[![License](https://img.shields.io/pypi/l/stardust-config.svg)](https://pypi.org/project/stardust-config/)
+
+```bash
+pip install stardust-config
+```
+
+or:
+
+```bash
+uv add stardust-config
+```
+
 ## Why ?
 
 In my personal projects, I spend a lot of time tinkering with the yaml and json files, and the parameters and it wastes a lot of time, and sometimes messes up with reproducibility. Stardust is aiming to fix all of that for all general ML usecases, while being easy to use.
