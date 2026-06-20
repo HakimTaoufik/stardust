@@ -1,0 +1,4 @@
+trainer:
+  method: qlora
+  lr: 0.0001
+  batch_size: 8

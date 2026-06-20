@@ -1,0 +1,4 @@
+trainer:
+  method: full_finetune
+  lr: 0.00001
+  batch_size: 2
