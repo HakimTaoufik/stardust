@@ -21,6 +21,8 @@ def main(config: TrainConfig, context: RunContext) -> None:
     print(config)
     print(f"Run directory: {context.run_dir}")
 
+    # ML pipeline would go here along side everything else
+
 
 if __name__ == "__main__":
     run(TrainConfig, main)
