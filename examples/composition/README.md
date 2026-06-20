@@ -58,3 +58,29 @@ Expected:
 - `model/llama_8b.yaml` is used
 - `trainer/full_finetune.yaml` is used
 - then `trainer.lr` is overridden to `2e-5`
+
+This example uses full run tracking:
+
+```python
+run(TrainConfig, main, tracking="full")
+```
+
+This saves:
+
+```text
+runs/.../
+  config.resolved.json
+  config.resolved.yaml
+  command.txt
+  metadata.json
+```
+
+`command.txt` contains the command used to start the run.
+
+`metadata.json` contains basic run metadata, including:
+
+- start time
+- Python version
+- platform
+- config path
+- CLI overrides
