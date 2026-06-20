@@ -1,9 +1,10 @@
 import json
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel
 

@@ -41,7 +41,8 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
         override: the dictionary containing values that should override `base`.
 
     Returns:
-        a new merged dictionary where the input dictionaries are not modified and values from `override` replace values from `base`
+        a new merged dictionary where the input dictionaries are not modified
+        and values from `override` replace values from `base`
     """
     result = deepcopy(base)
 
