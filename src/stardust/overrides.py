@@ -66,7 +66,14 @@ def parse_overrides(overrides: list[str]) -> dict[str, Any]:
     data: dict[str, Any] = {}
 
     for override in overrides:
+        if "=" not in override:
+            raise ValueError(f"Invalid override {override!r}. Expected format: key=value")
+
         key, value = override.split("=", 1)
+
+        if not key:
+            raise ValueError(f"Invalid override {override!r}. Override key cannot be empty")
+
         set_nested(data, key, parse_value(value))
 
     return data
