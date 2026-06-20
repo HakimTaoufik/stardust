@@ -3,7 +3,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 
-from stardust.loaders import load_yaml
+from stardust.loaders import load_file
 from stardust.merge import deep_merge
 from stardust.overrides import parse_overrides
 
@@ -26,7 +26,7 @@ def load_config(config_type: type[ConfigT], config_path: str | Path, overrides: 
     Returns:
         a validated config object
     """
-    data = load_yaml(config_path)
+    data = load_file(config_path)
 
     if overrides:
         data = deep_merge(data, parse_overrides(overrides))
