@@ -3,6 +3,7 @@ import platform
 import shlex
 import subprocess
 import sys
+import traceback
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -137,6 +138,32 @@ def save_packages(run_dir: Path) -> None:
     packages_path.write_text(json.dumps(packages, indent=2), encoding="utf-8")
 
 
+def save_status(run_dir: Path, status: str, started_at: datetime, error: BaseException | None = None) -> None:
+    """save the current run status"""
+    data: dict[str, str | float] = {
+        "status": status,
+        "started_at": started_at.isoformat(),
+    }
+
+    if status in {"finished", "failed"}:
+        ended_at = datetime.now().astimezone()
+        data["ended_at"] = ended_at.isoformat()
+        data["duration_seconds"] = (ended_at - started_at).total_seconds()
+
+    if error is not None:
+        data["error_type"] = type(error).__name__
+        data["error_message"] = str(error)
+
+    status_path = run_dir / "status.json"
+    status_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def save_traceback(run_dir: Path) -> None:
+    """save the traceback of a failed run"""
+    traceback_path = run_dir / "traceback.txt"
+    traceback_path.write_text(traceback.format_exc(), encoding="utf-8")
+
+
 def save_run_snapshot(config: BaseModel, run_dir: Path, config_path: Path, overrides: list[str], tracking: TrackingMode) -> None:
     """save run files depending on the selected tracking mode"""
     save_resolved_config(config, run_dir)
@@ -182,6 +209,8 @@ def run(config_type: type[ConfigT], main: Callable[[ConfigT, RunContext], None],
         main: the main function to run, which takes the validated config and a RunContext
         tracking: what to save in the run directory. use "config" or "full"
     """
+    started_at = datetime.now().astimezone()
+
     config_path, overrides = parse_args()
     config = load_config(config_type, config_path, overrides)
 
@@ -194,4 +223,16 @@ def run(config_type: type[ConfigT], main: Callable[[ConfigT, RunContext], None],
         overrides=overrides,
     )
 
-    main(config, context)
+    if tracking == "full":
+        save_status(run_dir, "running", started_at)
+
+    try:
+        main(config, context)
+    except Exception as error:
+        if tracking == "full":
+            save_status(run_dir, "failed", started_at, error)
+            save_traceback(run_dir)
+        raise
+
+    if tracking == "full":
+        save_status(run_dir, "finished", started_at)
