@@ -1,10 +1,12 @@
 import json
+import platform
+import shlex
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TypeVar
+from typing import Literal, TypeVar
 
 import yaml
 from pydantic import BaseModel
@@ -12,6 +14,7 @@ from pydantic import BaseModel
 from stardust.core import load_config
 
 ConfigT = TypeVar("ConfigT", bound=BaseModel)
+TrackingMode = Literal["config", "full"]
 
 
 @dataclass
@@ -41,6 +44,42 @@ def save_resolved_config(config: BaseModel, run_dir: Path) -> None:
     yaml_path.write_text(yaml.safe_dump(data, indent=2, sort_keys=False), encoding="utf-8")
 
 
+def save_command(run_dir: Path) -> None:
+    """save the command used to start the run"""
+    command = shlex.join(sys.argv)
+    (run_dir / "command.txt").write_text(command + "\n", encoding="utf-8")
+
+
+def save_metadata(run_dir: Path, config_path: Path, overrides: list[str], tracking: TrackingMode) -> None:
+    """save basic metadata about the run"""
+    metadata = {
+        "started_at": datetime.now().isoformat(),
+        "python_version": sys.version,
+        "platform": platform.platform(),
+        "config_path": str(config_path),
+        "overrides": overrides,
+        "tracking": tracking,
+    }
+
+    metadata_path = run_dir / "metadata.json"
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+
+def save_run_snapshot(config: BaseModel, run_dir: Path, config_path: Path, overrides: list[str], tracking: TrackingMode) -> None:
+    """save run files depending on the selected tracking mode"""
+    save_resolved_config(config, run_dir)
+
+    if tracking == "config":
+        return
+
+    if tracking == "full":
+        save_command(run_dir)
+        save_metadata(run_dir, config_path, overrides, tracking)
+        return
+
+    raise ValueError("tracking must be either 'config' or 'full'")
+
+
 def parse_args() -> tuple[Path, list[str]]:
     """
     parse command line arguments and return the config path and overrides
@@ -60,19 +99,20 @@ def parse_args() -> tuple[Path, list[str]]:
     return config_path, overrides
 
 
-def run(config_type: type[ConfigT], main: Callable[[ConfigT, RunContext], None]) -> None:
+def run(config_type: type[ConfigT], main: Callable[[ConfigT, RunContext], None], tracking: TrackingMode = "config") -> None:
     """
     main entry point for stardust.
 
     Args:
         config_type: the pydantic model class to use for validation
         main: the main function to run, which takes the validated config and a RunContext
+        tracking: what to save in the run directory. use "config" or "full"
     """
     config_path, overrides = parse_args()
     config = load_config(config_type, config_path, overrides)
 
     run_dir = create_run_dir()
-    save_resolved_config(config, run_dir)
+    save_run_snapshot(config, run_dir, config_path, overrides, tracking)
 
     context = RunContext(
         run_dir=run_dir,

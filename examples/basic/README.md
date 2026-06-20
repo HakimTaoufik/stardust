@@ -43,3 +43,14 @@ Expected:
 - the saved resolved config includes these final values
 
 Notice that even if you don't explicit all the values in the `config.yaml` file, the run will save the default values in the pydantic config in `train.py`.
+
+
+By default, Stardust uses simple config tracking.
+
+This saves only the resolved config:
+
+```text
+runs/.../
+  config.resolved.json
+  config.resolved.yaml
+```

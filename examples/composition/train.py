@@ -34,4 +34,4 @@ def main(config: TrainConfig, context: RunContext) -> None:
 
 
 if __name__ == "__main__":
-    run(TrainConfig, main)
+    run(TrainConfig, main, tracking="full")  # change to "config" to only save the config

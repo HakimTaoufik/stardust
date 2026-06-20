@@ -59,6 +59,4 @@ def load_file(path: str | Path) -> dict[str, Any]:
     if suffix == ".toml":
         return load_toml(path)
 
-    raise ValueError(
-        f"Unsupported config file extension {suffix!r}. Supported extensions are: .yaml, .yml, .json, .toml"
-    )
+    raise ValueError(f"Unsupported config file extension {suffix!r}. Supported extensions are: .yaml, .yml, .json, .toml")
