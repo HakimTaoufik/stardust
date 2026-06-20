@@ -27,21 +27,21 @@ def _validate_config_data(data: Any, path: Path) -> dict[str, Any]:
 def load_yaml(path: str | Path) -> dict[str, Any]:
     """Load a yaml file and return its content as a dictionary"""
     path = Path(path)
-    data = yaml.safe_load(path.read_text())
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
     return _validate_config_data(data, path)
 
 
 def load_json(path: str | Path) -> dict[str, Any]:
     """Load a json config file and return its content as a dictionary"""
     path = Path(path)
-    data = json.loads(path.read_text())
+    data = json.loads(path.read_text(encoding="utf-8"))
     return _validate_config_data(data, path)
 
 
 def load_toml(path: str | Path) -> dict[str, Any]:
     """Load a toml config file and return its content as a dictionary"""
     path = Path(path)
-    data = tomllib.loads(path.read_text())
+    data = tomllib.loads(path.read_text(encoding="utf-8"))
     return _validate_config_data(data, path)
 
 

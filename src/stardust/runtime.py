@@ -35,10 +35,10 @@ def save_resolved_config(config: BaseModel, run_dir: Path) -> None:
     data = config.model_dump(mode="json")
 
     json_path = run_dir / "config.resolved.json"
-    json_path.write_text(json.dumps(data, indent=2))
+    json_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     yaml_path = run_dir / "config.resolved.yaml"
-    yaml_path.write_text(yaml.safe_dump(data, indent=2, sort_keys=False))
+    yaml_path.write_text(yaml.safe_dump(data, indent=2, sort_keys=False), encoding="utf-8")
 
 
 def parse_args() -> tuple[Path, list[str]]:
