@@ -9,7 +9,10 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
     path = Path(path)
     data = yaml.safe_load(path.read_text())
 
-    assert data is not None, f"Config file {path} is empty"
-    assert isinstance(data, dict), f"Config file {path} must works as a dictionary"
+    if data is None:
+        raise ValueError(f"Config file {path} is empty")
+
+    if not isinstance(data, dict):
+        raise TypeError(f"Config file {path} must be a dictionary")
 
     return data
