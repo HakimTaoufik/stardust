@@ -74,6 +74,7 @@ runs/.../
   command.txt
   metadata.json
   git.json
+  packages.json
 ```
 
 `command.txt` contains the command used to start the run.
@@ -97,3 +98,5 @@ runs/.../
 - branch
 - commit
 - dirty state
+
+`packages.json` contains the installed Python packages in the current environment.
