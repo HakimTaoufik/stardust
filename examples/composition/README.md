@@ -75,6 +75,8 @@ runs/.../
   metadata.json
   git.json
   packages.json
+  status.json
+  traceback.txt  # only if the run fails
 ```
 
 `command.txt` contains the command used to start the run.
@@ -100,3 +102,7 @@ runs/.../
 - dirty state
 
 `packages.json` contains the installed Python packages in the current environment.
+
+`status.json` contains the run status, start time, end time, and duration.
+
+If the run fails, Stardust also saves `traceback.txt` with the Python traceback.
