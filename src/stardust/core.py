@@ -13,14 +13,14 @@ ConfigT = TypeVar("ConfigT", bound=BaseModel)
 
 def load_config(config_type: type[ConfigT], config_path: str | Path, overrides: list[str] | None = None) -> ConfigT:
     """
-    takes the config class, the path to the yaml config file, and a list of overrides
+    takes the config class, the path to the config file, and a list of overrides
     and returns the validated config object
 
-    if the yaml file is incomplete, the default values from the config class will be used
+    if the config file is incomplete, the default values from the config class will be used
 
     Args:
         config_type: the pydantic model class to use for validation
-        config_path: the path to the yaml config file
+        config_path: the path to the config file
         overrides: a list of overrides in the form of "key=value" strings
 
     Returns:

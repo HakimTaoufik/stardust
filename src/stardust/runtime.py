@@ -46,13 +46,13 @@ def parse_args() -> tuple[Path, list[str]]:
     parse command line arguments and return the config path and overrides
 
     Returns:
-        config_path: the path to the yaml config file
+        config_path: the path to the config file
         overrides: a list of overrides in the form of "key=value" strings
     """
     args = sys.argv[1:]
 
     if len(args) < 2 or args[0] not in {"--config", "-c"}:
-        raise SystemExit("Usage: python train.py --config config.yaml key=value")
+        raise SystemExit("Usage: python train.py --config CONFIG_FILE key=value")
 
     config_path = Path(args[1])
     overrides = args[2:]
