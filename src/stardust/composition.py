@@ -18,14 +18,17 @@ def parse_defaults(defaults: Any) -> dict[str, str]:
 
     groups: dict[str, str] = {}
 
-    for item in defaults:
+    for index, item in enumerate(defaults):
         if not isinstance(item, dict) or len(item) != 1:
-            raise TypeError("Each defaults entry must look like {'group': 'name'}")
+            raise TypeError(f"defaults[{index}] must look like {{'group': 'name'}}")
 
         group, name = next(iter(item.items()))
 
         if not isinstance(group, str) or not isinstance(name, str):
-            raise TypeError("Defaults groups and names must be strings")
+            raise TypeError(f"defaults[{index}] group and name must be strings")
+
+        if group in groups:
+            raise ValueError(f"Duplicate defaults group {group!r}")
 
         groups[group] = name
 
