@@ -1,4 +1,5 @@
 import json
+import yaml
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -30,9 +31,14 @@ def create_run_dir() -> Path:
 
 
 def save_resolved_config(config: BaseModel, run_dir: Path) -> None:
-    """save the resolved config to a json file in the run directory with all the default values filled in"""
-    path = run_dir / "config.resolved.json"
-    path.write_text(json.dumps(config.model_dump(mode="json"), indent=2))
+    """save the resolved config to a json and yaml files in the run directory with all the default values filled in"""
+    data = config.model_dump(mode="json")
+
+    json_path = run_dir / "config.resolved.json"
+    json_path.write_text(json.dumps(data, indent=2))
+
+    yaml_path = run_dir / "config.resolved.yaml"
+    yaml_path.write_text(yaml.safe_dump(data, indent=2, sort_keys=False))
 
 
 def parse_args() -> tuple[Path, list[str]]:
