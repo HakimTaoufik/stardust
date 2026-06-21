@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/stardust-config.svg)](https://pypi.org/project/stardust-config/)
 [![Python versions](https://img.shields.io/pypi/pyversions/stardust-config.svg)](https://pypi.org/project/stardust-config/)
 [![License](https://img.shields.io/pypi/l/stardust-config.svg)](https://pypi.org/project/stardust-config/)
-[![CI](https://github.com/HakimTaoufik/stardust/actions/workflows/ci.yml/badge.svg)](https://github.com/HakimTaoufik/stardust/actions/workflows/ci.yml)
+[![CI](https://github.com/HakimTaoufik/stardust/actions/workflows/ci.yaml/badge.svg)](https://github.com/HakimTaoufik/stardust/actions/workflows/ci.yaml)
 
 ```bash
 pip install stardust-config
