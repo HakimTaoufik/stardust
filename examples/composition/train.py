@@ -30,8 +30,28 @@ def main(config: TrainConfig, context: RunContext) -> None:
     print(config)
     print(f"Run directory: {context.run_dir}")
 
-    # ML pipeline would go here along side everything else
+    # ML pipeline would go here
+    accuracy = 0.91
+    f1 = 0.88
+
+    context.log_metric("accuracy", accuracy)
+    context.log_metrics(
+        {
+            "f1": f1,
+            "loss": 0.12,
+        }
+    )
+
+    summary_path = context.artifact_path("summary.txt")
+    summary_path.write_text(
+        f"model={config.model.name}\naccuracy={accuracy}\nf1={f1}\n",
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":
-    run(TrainConfig, main, tracking="full")  # change to "config" to only save the config
+    run(
+        TrainConfig,
+        main,
+        tracking=["config", "metadata", "git", "status", "traceback"],
+    )
