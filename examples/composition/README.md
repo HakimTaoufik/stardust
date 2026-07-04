@@ -62,30 +62,32 @@ Expected:
 This example uses custom run tracking:
 
 ```python
+from stardust import RunTracking
+
 run(
     TrainConfig,
     main,
-    tracking=["config", "metadata", "git", "status", "traceback"],
+    tracking=RunTracking(metadata=True, git=True, status=True, traceback=True),
 )
 ```
 
 This saves config files, metadata, git metadata, status, and failure tracebacks.
 
-You can also use presets:
+You can also use the built-in configurations:
 
 ```python
-run(Config, main, tracking="config")
-run(Config, main, tracking="full")
-run(Config, main, tracking="none")
+run(Config, main, tracking=RunTracking())
+run(Config, main, tracking=RunTracking.reproducible())
+run(Config, main, tracking=None)
 ```
 
-Or choose exactly what to track:
+Or choose exactly what to track through typed keyword arguments:
 
 ```python
-run(Config, main, tracking=["config", "status"])
+run(Config, main, tracking=RunTracking(config=False, status=True))
 ```
 
-Available tracking items:
+Available tracking options:
 
 - `config`
 - `command`

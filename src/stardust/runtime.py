@@ -5,11 +5,11 @@ import subprocess
 import sys
 import traceback
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime
 from importlib.metadata import PackageNotFoundError, distributions, version
 from pathlib import Path
-from typing import Literal, TypeVar
+from typing import TypeVar
 
 import yaml
 from pydantic import BaseModel
@@ -18,19 +18,66 @@ from stardust.core import load_config
 
 ConfigT = TypeVar("ConfigT", bound=BaseModel)
 MetricValue = int | float | str | bool | None
-TrackingItem = Literal["config", "command", "metadata", "git", "packages", "status", "traceback"]
-TrackingPreset = Literal["none", "config", "full"]
-Tracking = TrackingPreset | list[TrackingItem]
 
-FULL_TRACKING: set[TrackingItem] = {
-    "config",
-    "command",
-    "metadata",
-    "git",
-    "packages",
-    "status",
-    "traceback",
-}
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RunTracking:
+    """select the files and runtime information to save for a run"""
+
+    config: bool = True
+    command: bool = False
+    metadata: bool = False
+    git: bool = False
+    packages: bool = False
+    status: bool = False
+    traceback: bool = False
+
+    def __post_init__(self) -> None:
+        for option in fields(self):
+            if not isinstance(getattr(self, option.name), bool):
+                raise TypeError(f"RunTracking.{option.name} must be a bool")
+
+    @classmethod
+    def reproducible(
+        cls,
+        *,
+        config: bool = True,
+        command: bool = True,
+        metadata: bool = True,
+        git: bool = True,
+        packages: bool = True,
+        status: bool = True,
+        traceback: bool = True,
+    ) -> "RunTracking":
+        """track everything needed to inspect and reproduce a run"""
+        return cls(
+            config=config,
+            command=command,
+            metadata=metadata,
+            git=git,
+            packages=packages,
+            status=status,
+            traceback=traceback,
+        )
+
+    @classmethod
+    def none(cls) -> "RunTracking":
+        """disable all built-in run tracking"""
+        return cls(
+            config=False,
+            command=False,
+            metadata=False,
+            git=False,
+            packages=False,
+            status=False,
+            traceback=False,
+        )
+
+    def _enabled_names(self) -> list[str]:
+        return [option.name for option in fields(self) if getattr(self, option.name)]
+
+
+_DEFAULT_TRACKING = RunTracking()
 
 
 @dataclass
@@ -163,7 +210,7 @@ def run_command(command: list[str]) -> str | None:
     return result.stdout.strip()
 
 
-def save_metadata(run_dir: Path, config_path: Path, overrides: list[str], tracking_items: set[TrackingItem]) -> None:
+def save_metadata(run_dir: Path, config_path: Path, overrides: list[str], tracking: RunTracking) -> None:
     """save basic metadata about the run"""
     metadata = {
         "started_at": datetime.now().astimezone().isoformat(),
@@ -171,7 +218,7 @@ def save_metadata(run_dir: Path, config_path: Path, overrides: list[str], tracki
         "working_dir": str(Path.cwd()),
         "config_path": str(config_path),
         "overrides": overrides,
-        "tracking": sorted(tracking_items),
+        "tracking": tracking._enabled_names(),
         "python_version": sys.version,
         "python_executable": sys.executable,
         "platform": platform.platform(),
@@ -256,50 +303,24 @@ def save_traceback(run_dir: Path) -> None:
     traceback_path.write_text(traceback.format_exc(), encoding="utf-8")
 
 
-def normalize_tracking(tracking: Tracking) -> set[TrackingItem]:
-    """normalize a tracking preset or explicit tracking item list to a set of tracking items"""
-    if tracking == "none":
-        return set()
-
-    if tracking == "config":
-        return {"config"}
-
-    if tracking == "full":
-        return set(FULL_TRACKING)
-
-    if isinstance(tracking, str):
-        raise ValueError("tracking must be 'none', 'config', 'full', or a list of tracking items")
-
-    tracking_items = set(tracking)
-    unknown_items = tracking_items - FULL_TRACKING
-
-    if unknown_items:
-        unknown = ", ".join(sorted(unknown_items))
-        raise ValueError(f"unknown tracking item(s): {unknown}")
-
-    return tracking_items
-
-
 def save_run_snapshot(
     config: BaseModel,
     run_dir: Path,
     config_path: Path,
     overrides: list[str],
-    tracking_items: set[TrackingItem],
+    tracking: RunTracking,
 ) -> None:
-    """save run files depending on the selected tracking items"""
-    for item in tracking_items:
-        match item:
-            case "config":
-                save_resolved_config(config, run_dir)
-            case "command":
-                save_command(run_dir)
-            case "metadata":
-                save_metadata(run_dir, config_path, overrides, tracking_items)
-            case "git":
-                save_git_metadata(run_dir)
-            case "packages":
-                save_packages(run_dir)
+    """save the selected run files"""
+    if tracking.config:
+        save_resolved_config(config, run_dir)
+    if tracking.command:
+        save_command(run_dir)
+    if tracking.metadata:
+        save_metadata(run_dir, config_path, overrides, tracking)
+    if tracking.git:
+        save_git_metadata(run_dir)
+    if tracking.packages:
+        save_packages(run_dir)
 
 
 def parse_args() -> tuple[Path, list[str]]:
@@ -321,23 +342,32 @@ def parse_args() -> tuple[Path, list[str]]:
     return config_path, overrides
 
 
-def run(config_type: type[ConfigT], main: Callable[[ConfigT, RunContext], None], tracking: Tracking = "config") -> None:
+def run(
+    config_type: type[ConfigT],
+    main: Callable[[ConfigT, RunContext], None],
+    tracking: RunTracking | None = _DEFAULT_TRACKING,
+) -> None:
     """
     main entry point for stardust.
 
     Args:
         config_type: the pydantic model class to use for validation
         main: the main function to run, which takes the validated config and a RunContext
-        tracking: what to save in the run directory. use "none", "config", "full", or a list of tracking items
+        tracking: typed settings for files and runtime information to save
     """
     started_at = datetime.now().astimezone()
 
+    if tracking is None:
+        tracking = RunTracking.none()
+
+    if not None and not isinstance(tracking, RunTracking):
+        raise TypeError("tracking must be a RunTracking instance")
+
     config_path, overrides = parse_args()
     config = load_config(config_type, config_path, overrides)
-    tracking_items = normalize_tracking(tracking)
 
     run_dir = create_run_dir()
-    save_run_snapshot(config, run_dir, config_path, overrides, tracking_items)
+    save_run_snapshot(config, run_dir, config_path, overrides, tracking)
 
     context = RunContext(
         run_dir=run_dir,
@@ -345,17 +375,17 @@ def run(config_type: type[ConfigT], main: Callable[[ConfigT, RunContext], None],
         overrides=overrides,
     )
 
-    if "status" in tracking_items:
+    if tracking.status:
         save_status(run_dir, "running", started_at)
 
     try:
         main(config, context)
     except Exception as error:
-        if "status" in tracking_items:
+        if tracking.status:
             save_status(run_dir, "failed", started_at, error)
-        if "traceback" in tracking_items:
+        if tracking.traceback:
             save_traceback(run_dir)
         raise
 
-    if "status" in tracking_items:
+    if tracking.status:
         save_status(run_dir, "finished", started_at)
