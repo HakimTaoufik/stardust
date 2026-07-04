@@ -59,50 +59,56 @@ Expected:
 - `trainer/full_finetune.yaml` is used
 - then `trainer.lr` is overridden to `2e-5`
 
-This example uses full run tracking:
+This example uses custom run tracking:
 
 ```python
-run(TrainConfig, main, tracking="full")
+run(
+    TrainConfig,
+    main,
+    tracking=["config", "metadata", "git", "status", "traceback"],
+)
 ```
 
-This saves:
+This saves config files, metadata, git metadata, status, and failure tracebacks.
 
-```text
-runs/.../
-  config.resolved.json
-  config.resolved.yaml
-  command.txt
-  metadata.json
-  git.json
-  packages.json
-  status.json
-  traceback.txt  # only if the run fails
+You can also use presets:
+
+```python
+run(Config, main, tracking="config")
+run(Config, main, tracking="full")
+run(Config, main, tracking="none")
 ```
 
-`command.txt` contains the command used to start the run.
+Or choose exactly what to track:
 
-`metadata.json` contains basic run metadata, including:
+```python
+run(Config, main, tracking=["config", "status"])
+```
 
-- start time
-- Python version
-- platform
-- config path
-- CLI overrides
-- run directory
-- working directory
-- Python executable
-- hostname
-- Stardust version
+Available tracking items:
 
-`git.json` contains Git metadata when the run is started inside a Git repository:
+- `config`
+- `command`
+- `metadata`
+- `git`
+- `packages`
+- `status`
+- `traceback`
 
-- repository root
-- branch
-- commit
-- dirty state
+The example also logs metrics through `RunContext`:
 
-`packages.json` contains the installed Python packages in the current environment.
+```python
+context.log_metric("accuracy", 0.91)
+context.log_metrics({"f1": 0.88, "loss": 0.12})
+```
 
-`status.json` contains the run status, start time, end time, and duration.
+This creates `metrics.json` in the run directory.
 
-If the run fails, Stardust also saves `traceback.txt` with the Python traceback.
+The example also saves artifacts safely inside the run directory:
+
+```python
+summary_path = context.artifact_path("summary.txt")
+summary_path.write_text("result", encoding="utf-8")
+```
+
+This creates `artifacts/summary.txt`.
