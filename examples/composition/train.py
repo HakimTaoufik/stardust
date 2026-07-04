@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from stardust import RunContext, run
+from stardust import RunContext, RunTracking, run
 
 
 class ModelConfig(BaseModel):
@@ -53,5 +53,5 @@ if __name__ == "__main__":
     run(
         TrainConfig,
         main,
-        tracking=["config", "metadata", "git", "status", "traceback"],
+        tracking=RunTracking(metadata=True, git=True, status=True, traceback=True),
     )
