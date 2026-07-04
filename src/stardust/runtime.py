@@ -288,20 +288,18 @@ def save_run_snapshot(
     tracking_items: set[TrackingItem],
 ) -> None:
     """save run files depending on the selected tracking items"""
-    if "config" in tracking_items:
-        save_resolved_config(config, run_dir)
-
-    if "command" in tracking_items:
-        save_command(run_dir)
-
-    if "metadata" in tracking_items:
-        save_metadata(run_dir, config_path, overrides, tracking_items)
-
-    if "git" in tracking_items:
-        save_git_metadata(run_dir)
-
-    if "packages" in tracking_items:
-        save_packages(run_dir)
+    for item in tracking_items:
+        match item:
+            case "config":
+                save_resolved_config(config, run_dir)
+            case "command":
+                save_command(run_dir)
+            case "metadata":
+                save_metadata(run_dir, config_path, overrides, tracking_items)
+            case "git":
+                save_git_metadata(run_dir)
+            case "packages":
+                save_packages(run_dir)
 
 
 def parse_args() -> tuple[Path, list[str]]:
