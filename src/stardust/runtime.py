@@ -356,10 +356,10 @@ def run(
         tracking: typed settings for files and runtime information to save
     """
     started_at = datetime.now().astimezone()
-    
+
     if tracking is None:
         tracking = RunTracking.none()
-    
+
     if not None and not isinstance(tracking, RunTracking):
         raise TypeError("tracking must be a RunTracking instance")
 
