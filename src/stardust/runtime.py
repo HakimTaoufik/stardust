@@ -345,7 +345,7 @@ def parse_args() -> tuple[Path, list[str]]:
 def run(
     config_type: type[ConfigT],
     main: Callable[[ConfigT, RunContext], None],
-    tracking: RunTracking = _DEFAULT_TRACKING,
+    tracking: RunTracking | None = _DEFAULT_TRACKING,
 ) -> None:
     """
     main entry point for stardust.
@@ -356,8 +356,11 @@ def run(
         tracking: typed settings for files and runtime information to save
     """
     started_at = datetime.now().astimezone()
-
-    if not isinstance(tracking, RunTracking):
+    
+    if tracking is None:
+        tracking = RunTracking.none()
+    
+    if not None and not isinstance(tracking, RunTracking):
         raise TypeError("tracking must be a RunTracking instance")
 
     config_path, overrides = parse_args()

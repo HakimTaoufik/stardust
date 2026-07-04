@@ -78,7 +78,7 @@ You can also use the built-in configurations:
 ```python
 run(Config, main, tracking=RunTracking())
 run(Config, main, tracking=RunTracking.reproducible())
-run(Config, main, tracking=RunTracking.none())
+run(Config, main, tracking=None)
 ```
 
 Or choose exactly what to track through typed keyword arguments:
